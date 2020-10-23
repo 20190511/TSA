@@ -4,6 +4,17 @@
 #include <math.h>
 
 
+void print_debug(int index[][32])
+{
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 32; j++)
+            printf("%d ", index[i][j]);
+        printf("\n");
+    }
+    printf("\n");
+}
+
 
 //배열을 출력해줌
 void print_array(int array[][5])
@@ -30,7 +41,7 @@ void matrixFolder(int origin_one[25], int origin_two[][5])
     }
 }
 
-void makeMatrix(int matrix_v[][5], int binaryColumn[5], int v, int value)
+void makeMatrix(int matrix_v[][32], int binaryColumn[5], int v, int value)
 {
     int col = 0;
     for (int i = 0; i < 5; i++)
@@ -59,7 +70,7 @@ int binaryToTen(int binaryColumn[5])
 
 
 //max 행렬 경로 구하는 함수
-int matrixPath(int matrix[][5], int index[][5])
+int matrixPath(int matrix[][5], int index[][32])
 {
     //{v0,v1,v2,v3,v4}순으로 값 넣기 -> 2진수화
     int binaryColumn[5] = { 0, };
@@ -91,7 +102,7 @@ int matrixPath(int matrix[][5], int index[][5])
     //4개 중 2개를 골라 1로 변환
     for (int a = 1; a < 5; a++)
     {
-        for (int b = a + 1; a < 5; a++)
+        for (int b = a + 1; b < 5; b++)
         {
             resetMatrix(binaryColumn);
             binaryColumn[a] = 1;
@@ -102,19 +113,23 @@ int matrixPath(int matrix[][5], int index[][5])
                 {
                     //index 값 이진수 -> 10진수로 바꾸기
                     int col = pow(2,b);
+
                     int value = matrix[j][a] + index[a][col];
+
                     int col2 = pow(2,a);
                     int value2 = matrix[j][b] + index[b][col2];
+                    
                     if (value > value2)
                         makeMatrix(index, binaryColumn, j, value2);
                     else
                         makeMatrix(index, binaryColumn, j, value);
+
                 }
             }
-        }
+       }
     }
 
-    //A ={3개} , 반례 이용
+    //A ={3개} , 반례 이용 ---수정필요
     for (int e = 1; e < 5; e++)
     {
         
@@ -127,18 +142,14 @@ int matrixPath(int matrix[][5], int index[][5])
 
         int minVal[3] = { 0, };
         int k = 0;
-        int first_row = 0;
+        int first_row = e;
         for (int j = 1; j < 5; j++)
         { 
             int binaryCal[5] = { 0, };
-            if (j == e)
-            {
-                first_row = j;
-            }
-            else
+            if (j != first_row)
             {
                 for (int v = 1 ; v < 5 ; v++)
-                    if (v != j)
+                    if (v != j && v != e)
                     {
                         binaryCal[v] = 1;
                     }
@@ -169,6 +180,10 @@ int matrixPath(int matrix[][5], int index[][5])
         minimumPath[i-1] = matrix[0][i] + index[i][col];
     }
     
+    for (int i = 0; i < 4; i++)
+        printf("%d ", minimumPath[i]);
+    printf("\n");
+
     int minimum = 1000;
     for (int i = 1; i < 4; i++)
     {
@@ -200,5 +215,12 @@ int main()
     int matrix_v[5][32] = { 0, } ;
     matrixPath(origin_two, matrix_v);
 
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 32; j++)
+            printf("%d ", matrix_v[i][j]);
+        printf("\n");
+    }
+        
     return 0;
 }
