@@ -4,6 +4,7 @@
 #include <math.h>
 
 
+//디버깅을 위해 실행한 함수
 void print_debug(int index[][32])
 {
     for (int i = 0; i < 5; i++)
@@ -16,6 +17,7 @@ void print_debug(int index[][32])
 }
 
 
+//해당 원소를 찾는 함수
 int find_key(int array[5] , int key)
 {
     for (int i = 0 ; i < 5 ; i++)
@@ -38,12 +40,14 @@ void print_array(int array[][5])
     printf("\n\n");
 }
 
+
+//경로 출력함수
 void print_path(int path[][5])
 {
     int row[5] = { 0, };
     int col[5] = { 0, };
     int count = 0;
-    printf("\n\n ++++++++ print Path : Start ++++++++ \n\n");
+    //printf("\n\n ++++++++ print Path : Start ++++++++ \n\n");
     for (int i = 0; i < 25; i++) {
         //hi , ro 레지스터 착안
         int lo = i / 5;    //행 
@@ -65,7 +69,7 @@ void print_path(int path[][5])
     printf("%d 순환" , row[node]+1);
 
 
-    printf("\n\n ++++++++ print Path : End ++++++++ \n\n");
+    //printf("\n\n ++++++++ print Path : End ++++++++ \n\n");
 }
 
 // 일차원 행렬 -> 2차원 행렬로 변환해주는 함수 김병기 교수님 방식 착안
@@ -113,15 +117,20 @@ int matrixPath(int matrix[][5], int index[][32], int minimumPath[4])
 {
     //{v0,v1,v2,v3,v4}순으로 값 넣기 -> 2진수화
     int binaryColumn[5] = { 0, };
+    printf("\nA = {0개} \n\n");
     for (int i = 1; i < 5; i++)
     {
         //공집합이므로 0000-> 0임
         index[i][0] = matrix[i][0];
+        printf("D[V%d][empty] = %d \n", i,matrix[i][0]);
     }
-
+    printf("\n");
+    printf("---------------------------------------------------------------------");
     //A = {1개}
+    printf("\nA = {1개} \n\n");
     for (int k = 1; k < 5; k++)
     {
+        printf("A = {V%d} \n" , k);
         resetMatrix(binaryColumn);
         binaryColumn[k] = 1;
         for (int j = 1; j < 5; j++)
@@ -132,16 +141,22 @@ int matrixPath(int matrix[][5], int index[][32], int minimumPath[4])
                 /* 첫 코드라서 10진수 변환 필요 없음,*/
                 int value = matrix[j][k] + index[k][0];
                 makeMatrix(index, binaryColumn, j, value);
+                //상태 출력
+                printf("D[V%d][{A}] = min{ W[%d][%d] + D[%d][empty] } = (%d + %d) = %d \n" , k,j,k,k,matrix[j][k],index[k][0],value);     
             }
         }
+        printf("\n");
     }
 
+    printf("---------------------------------------------------------------------");
     //A = {2개}
     //4개 중 2개를 골라 1로 변환
+    printf("\nA = {2개} \n\n");
     for (int a = 1; a < 5; a++)
     {
         for (int b = a + 1; b < 5; b++)
         {
+            printf("A = {%d,%d} \n", a,b);
             resetMatrix(binaryColumn);
             binaryColumn[a] = 1;
             binaryColumn[b] = 1;
@@ -151,86 +166,114 @@ int matrixPath(int matrix[][5], int index[][32], int minimumPath[4])
                 {
                     //index 값 이진수 -> 10진수로 바꾸기
                     int col = pow(2, b);
-
                     int value = matrix[j][a] + index[a][col];
 
                     int col2 = pow(2, a);
                     int value2 = matrix[j][b] + index[b][col2];
 
+                    printf("D[V%d][{A}] = min{ W[%d][%d] + D[%d][{V%d}], W[%d][%d] + D[%d][{V%d}] } = ", j, j, a, a,b,j,b,b,a);
+                    printf("min{ %d+%d , %d+%d } = ", matrix[j][a] , index[a][col], matrix[j][b] , index[b][col2]);
                     if (value > value2)
+                    {
                         makeMatrix(index, binaryColumn, j, value2);
+                        printf("%d\n", value2);
+                        
+                    }
                     else
+                    {
                         makeMatrix(index, binaryColumn, j, value);
-
+                        printf("%d\n", value);
+                    }
                 }
             }
+            printf("\n");
         }
     }
 
+    printf("---------------------------------------------------------------------");
     //A ={3개} , 반례 이용 
+    printf("\nA = {3개} \n\n");
     for (int e = 1; e < 5; e++)
     {
-
+        printf("A = { ");
         resetMatrix(binaryColumn);
         for (int s = 1; s < 5; s++)
             if (s != e)
             {
                 binaryColumn[s] = 1;
+                printf("V%d ,", s);
             }
+        printf("} \n");
 
         int minVal[3] = { 0, };
         int k = 0;
         int first_row = e;
+
+        printf("D[%d][{A}] = min{ ",e);
         for (int j = 1; j < 5; j++)
         {
             int binaryCal[5] = { 0, };
             if (j != first_row)
             {
+                printf("W[%d][%d] + [{", e, j);
                 for (int v = 1; v < 5; v++)
                     if (v != j && v != e)
                     {
                         binaryCal[v] = 1;
+                        printf("V%d,", v);
                     }
+                printf("}] , ");
                 int key = binaryToTen(binaryCal);
                 minVal[k] = matrix[first_row][j] + index[j][key];
                 k++;
             }
-
         }
+        printf("} = min { %d,%d,%d } = " , minVal[0], minVal[1], minVal[2]);
         int final_value = minVal[0];
         if (final_value > minVal[1])
             final_value = minVal[1];
         if (final_value > minVal[2])
             final_value = minVal[2];
+        printf("%d\n\n", final_value);
         makeMatrix(index, binaryColumn, first_row, final_value);
-
     }
 
 
+    printf("---------------------------------------------------------------------");
     // A = {4개}
+    printf("\nA = {4개} \n\n");
+    printf("A = {V1,V2,V3,V4} \n");
+    printf("D[0][{A}] = min{ ");
     for (int i = 1; i < 5; i++)
     {
         int bin[5] = { 0, };
+ 
+        printf("W[0][%d]+D[%d][{", i, i);
         for (int j = 1; j < 5; j++)
+        {
             if (j != i)
+            {
                 bin[j] = 1;
+                printf("V%d,", j);
+            }
+        }
+        printf("}] ");
         int col = binaryToTen(bin);
         minimumPath[i - 1] = matrix[0][i] + index[i][col];
     }
 
-    for (int i = 0; i < 4; i++)
-        printf("%d ", minimumPath[i]);
-    printf("\n");
-
+    printf("} \n= min{ %d, %d, %d, %d } = ",minimumPath[0], minimumPath[1], minimumPath[2], minimumPath[3]);
     int minimum = 1000;
     minimum = minimumPath[0];
     if (minimum > minimumPath[1])
-        minimum = minimumPath[1];
+        minimum = minimumPath[1]; 
     if (minimum > minimumPath[2])
-        minimum = minimumPath[2];
+        minimum = minimumPath[2]; 
     if (minimum > minimumPath[3])
-        minimum = minimumPath[3];
+        minimum = minimumPath[3]; 
 
+    printf("%d\n", minimum);
+    printf("따라서, 최적경로의 가중치의 최소의 합은 = %d 입니다.", minimum);
     return minimum;
 
 }
@@ -331,12 +374,34 @@ void findPath(int matrix[][5], int index[][32], int path[][5], int minimum, int 
     path[index3][min2_index] = 1;         /* path[2][4]*/
     path[min2_index][min1_index] = 1;     /*path[4][3]*/
     path[min1_index][0] = 1;              /*path[3][0]*/
-
-    print_array(path);
 }
 
 
 /* 실행 함수들 */
+int execution_calculation(int origin[][5], int matrix_v[][32], int minimumPath[4])
+{
+    printf("\n +++++++++ Calculate Path : Start +++++++++\n\n");
+    int minimum = matrixPath(origin, matrix_v, minimumPath);
+    printf("\n +++++++++ Calculate Path : End +++++++++\n");
+    return minimum;
+}
+
+void execution_printPath(int origin[][5], int matrix_v[][32], int minimumPath[4], int path[][5] , int minimum)
+{
+    printf("\n +++++++++ print Path : Start +++++++++\n");
+    findPath(origin, matrix_v, path, minimum, minimumPath);
+    printf("--- [print Array] ---\n");
+    print_array(path);
+    printf("--- [print Path] :(Arrow) ---\n");
+    print_path(path);
+    printf("\n\n +++++++++ print Path : End +++++++++\n");
+
+}
+
+
+
+
+
 
 int main()
 {
@@ -347,11 +412,11 @@ int main()
     int matrix_v[5][32] = { 0, };
     int path[5][5] = { 0, };
     int minimumPath[4] = { 0, };
-    int minimum = matrixPath(origin_two, matrix_v, minimumPath);
+    /*배열 세팅 완료*/
 
 
-    printf("\n\n");
-    findPath(origin_two, matrix_v, path, minimum, minimumPath);
-    print_path(path);
+    int minimum = execution_calculation(origin_two, matrix_v, minimumPath);
+    printf("\n\n\n\n\n\n\n\n\n");
+    execution_printPath(origin_two, matrix_v, minimumPath, path, minimum);
     return 0;
 }
