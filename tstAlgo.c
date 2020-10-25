@@ -215,7 +215,7 @@ int matrixPath(int matrix[][5], int index[][32], int minimumPath[4])
             int binaryCal[5] = { 0, };
             if (j != first_row)
             {
-                printf("W[%d][%d]+[{", e, j);
+                printf("W[%d][%d]+D[%d][{", e, j,j);
                 for (int v = 1; v < 5; v++)
                     if (v != j && v != e)
                     {
